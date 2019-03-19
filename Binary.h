@@ -26,6 +26,7 @@ public:
     friend std::istream & operator >>(std::istream & cin,  Binary & binary_value);
 
     void sign_extension(int to_len);
+    void sign_shrink(int to_len);
     void shift_left(int dist=1);
     void shift_right(int dist=1);
     
@@ -34,6 +35,7 @@ public:
     friend Binary operator +(Binary a, Binary b);
     friend Binary operator *(const Binary & a, const Binary & b);
     friend Binary operator /(const Binary & a, const Binary & b);
+    void operator= (const Binary & a); 
 };
 
 bool check_valid(Binary * toCheck);

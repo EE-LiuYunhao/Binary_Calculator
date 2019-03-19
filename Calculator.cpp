@@ -26,21 +26,21 @@ int main()
     cin>>oper;
     if(oper=='+')
     {
-        cout<<"a+b=\n\t"<<a+b<<endl;
+        cout<<"a+b=\n"<<a+b<<endl;
     }
     else if(oper=='-')
     {
         b.negative();
-        cout<<"a-b=\n\t"<<a+b<<endl;
+        cout<<"a-b=\n"<<a+b<<endl;
         b.negative();
     }
     else if(oper=='*')
     {
-        cout<<"a*b=\n\t"<<a*b<<endl;
+        cout<<"a*b=\n"<<a*b<<endl;
     }
     else if(oper=='/')
     {
-        cout<<"a/b=\n\t"<<a/b<<endl;
+        cout<<"a/b=\n"<<a/b<<endl;
     }
     else
     {

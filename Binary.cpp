@@ -2,6 +2,13 @@
 #include <iostream>
 #include <string>
 
+enum mani_algorithm
+{
+    BOOTH_ALGORITHM=1,NORMAL_ALGORITHM=2
+};
+
+const short MANIPULATION_OPERATION = NORMAL_ALGORITHM;
+
 Binary::Binary(int value, int length)
 {
     this->length = length;
@@ -179,6 +186,20 @@ void Binary::sign_extension(int to_len)
     {
         this->bits[i]=this->bits[length-1];
     }
+    delete origin;
+    this->length = to_len;
+}
+void Binary::sign_shrink(int to_len)
+{
+    if(to_len>=this->length)    return;
+    short * origin = this->bits;
+    this->bits = new short[to_len];
+    this->bits[to_len-1] = origin[this->length-1];
+    for(int i=0;i<to_len-1;i++)
+    {
+        this->bits[i]=origin[i];
+    }
+    delete origin;
     this->length = to_len;
 }
 void Binary::shift_left(int dist)
@@ -240,9 +261,47 @@ Binary operator +(Binary a, Binary b)
 }
 Binary operator *(const Binary & a, const Binary & b)
 {
-    //TODO
+    if(MANIPULATION_OPERATION==NORMAL_ALGORITHM)
+    {
+        //using the normal shifting and adding algorithm to calculate
+        Binary copy_a = Binary(a);
+        copy_a.sign_extension(a.length+b.length);
+        Binary ret_val = Binary(0,a.length+b.length);
+        for(int i=0;i<b.length-1;i++)
+        {
+            std::cout<<copy_a<<std::endl;
+            if(b.bits[i])
+            {
+                std::cout<<"b.bits["<<i<<"] is 1 and the result should = "<<ret_val+copy_a;
+                ret_val = ret_val + copy_a;
+                std::cout<<"\tthe current result = "<<ret_val<<std::endl;
+            }
+            copy_a.shift_left();
+        }
+        if(b.bits[b.length-1])
+        {
+            copy_a.shift_right(b.length-2);
+            copy_a.negative();
+            copy_a.shift_left(b.length-1);
+            std::cout<<copy_a<<std::endl;
+            ret_val = ret_val+copy_a;
+        }
+        return ret_val;
+    }
+    else if(MANIPULATION_OPERATION==BOOTH_ALGORITHM)
+    {
+        //using the booth algorithm
+    }
 }
 Binary operator /(const Binary & a, const Binary & b)
 {
     //
+}
+void Binary::operator=(const Binary & a)
+{
+    this->bits[this->length-1] = a.bits[a.length-1];
+    for(int i=0;i<this->length-1;i++)
+    {
+        this->bits[i] = a.bits[i];
+    }
 }
