@@ -300,7 +300,7 @@ Binary operator *(const Binary & a, const Binary & b)
         ret_val.sign_shrink(a.length>b.length?a.length:b.length);
         return ret_val;
     }
-    else if(MANIPULATION_OPERATION==BOOTH_ALGORITHM)
+    else if(MANIPULATION_OPERATION==BOOTH_ALGORITHM) //logic error here, needs rewrite... maybe useless since only for unsigned
     {
         if(a.length>b.length)   return b*a;
 
