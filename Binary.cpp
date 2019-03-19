@@ -7,7 +7,7 @@ enum mani_algorithm
     BOOTH_ALGORITHM=1,NORMAL_ALGORITHM=2
 };
 
-const short MANIPULATION_OPERATION = NORMAL_ALGORITHM;
+const short MANIPULATION_OPERATION = BOOTH_ALGORITHM;
 
 Binary::Binary(int value, int length)
 {
@@ -205,7 +205,7 @@ void Binary::sign_shrink(int to_len)
 void Binary::shift_left(int dist)
 {
     if(dist<1)  dist = 1;
-    for(int i=length-1;i>=dist;i--)
+    for(int i=length-2;i>=dist;i--)
     {
         bits[i] = bits[i-dist];
     }
@@ -269,12 +269,18 @@ Binary operator *(const Binary & a, const Binary & b)
         Binary ret_val = Binary(0,a.length+b.length);
         for(int i=0;i<b.length-1;i++)
         {
-            std::cout<<copy_a<<std::endl;
+            #ifdef DEBUG
+                std::cout<<copy_a<<std::endl;
+                #endif
             if(b.bits[i])
             {
-                std::cout<<"b.bits["<<i<<"] is 1 and the result should = "<<ret_val+copy_a;
+                #ifdef DEBUG
+                    std::cout<<"b.bits["<<i<<"] is 1 and the result should = "<<ret_val+copy_a;
+                    #endif
                 ret_val = ret_val + copy_a;
-                std::cout<<"\tthe current result = "<<ret_val<<std::endl;
+                #ifdef DEBUG
+                    std::cout<<"\tthe current result = "<<ret_val<<std::endl;
+                    #endif
             }
             copy_a.shift_left();
         }
@@ -282,20 +288,69 @@ Binary operator *(const Binary & a, const Binary & b)
         {
             copy_a.shift_right(b.length-2);
             copy_a.negative();
-            copy_a.shift_left(b.length-1);
-            std::cout<<copy_a<<std::endl;
+            #ifdef DEBUG
+                std::cout<<"Sign: Before shifting"<<copy_a<<std::endl;
+                #endif
+            copy_a.shift_left(b.length-2);
+            #ifdef DEBUG
+                std::cout<<"Sign: After shifting"<<copy_a<<std::endl;
+                #endif
             ret_val = ret_val+copy_a;
         }
+        ret_val.sign_shrink(a.length>b.length?a.length:b.length);
         return ret_val;
     }
     else if(MANIPULATION_OPERATION==BOOTH_ALGORITHM)
     {
-        //using the booth algorithm
+        if(a.length>b.length)   return b*a;
+
+        //a length <= b length
+        Binary first_half = Binary(0,b.length);
+        short * last_half = new short [b.length+1];
+
+        for(int i=0;i<b.length;i++)     last_half[i]=b.bits[i];
+        last_half[b.length] = 0;
+
+        for(int i=0;i<b.length;i++)
+        {
+            if(last_half[0]==last_half[1]) //0-0 or 1-1: shift
+            {
+                for(int j=0;j<b.length-1;j++)   last_half[i]=last_half[i+1];
+                last_half[b.length-1]=first_half.bits[0];
+                first_half.shift_right();
+            }
+            else if(last_half[1]==1 && last_half[0]==0) //1-0: first_half-a, shift
+            {
+                Binary c = Binary(a);
+                c.negative();
+                first_half = first_half + c;
+
+                for(int j=0;j<b.length-1;j++)   last_half[i]=last_half[i+1];
+                last_half[b.length-1]=first_half.bits[0];
+                first_half.shift_right();                
+            }
+            else //0-1: last_half+a, shift
+            {
+                first_half = first_half + a;
+
+                for(int j=0;j<b.length-1;j++)   last_half[i]=last_half[i+1];
+                last_half[b.length-1]=first_half.bits[0];
+                first_half.shift_right();
+            }
+            std::cout<<"a: "<<first_half<<" q: ";
+            for(int f=b.length-1;f>0;f--)  std::cout<<last_half[f];
+            std::cout<<" q0: "<<last_half[0]<<std::endl;
+        }
+        first_half.sign_extension(2*b.length);
+        first_half.shift_left(b.length);
+        for(int k=0;k<b.length;k++)     first_half.bits[k]=last_half[k];
+        delete last_half;
+        return first_half;
     }
 }
 Binary operator /(const Binary & a, const Binary & b)
 {
-    //
+    std::cout<<"Integer division is not supported yet"<<std::endl;
 }
 void Binary::operator=(const Binary & a)
 {
